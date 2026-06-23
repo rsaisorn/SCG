@@ -1,0 +1,73 @@
+graph TD
+%% Define Styles & Classes
+    classDef publicSubnet fill:#e1f5fe,stroke:#0288d1,stroke-width:2px,stroke-dasharray: 5 5;
+    classDef privateSubnet fill:#efebe9,stroke:#5d4037,stroke-width:2px,stroke-dasharray: 5 5;
+    classDef awsService fill:#fff3e0,stroke:#ffb74d,stroke-width:2px;
+    classDef internet fill:#eceff1,stroke:#607d8b,stroke-width:2px;
+    classDef storage fill:#dcedc8,stroke:#689f38,stroke-width:2px;
+
+%% Internet Boundary
+    User(("🌐 Public Users / Admins / Apps")):::internet
+    IGW["Internet Gateway (IGW)"]:::awsService
+
+%% AWS Managed Services (Global/Regional)
+    subgraph AWSManaged ["AWS Managed Services"]
+        SM["AWS Secrets Manager<br>(Secure DB Credentials)"]:::awsService
+    end
+
+%% Custom VPC Boundary
+    subgraph VPC ["AWS Custom VPC (10.0.0.0/16)"]
+
+    %% Public Subnets
+        subgraph PublicSubnets ["Public Subnets (Zone A & B)"]
+            ALB["Application Load Balancer (ALB)<br>🔒 SSL/TLS"]:::awsService
+            NAT["NAT Gateway (Elastic IP)"]:::awsService
+        end
+        class PublicSubnets publicSubnet;
+
+    %% Private Subnets (Zone A)
+        subgraph PrivateSubnetA ["Private Subnet A (Active / Primary)"]
+
+            subgraph ASG ["Auto Scaling Group (Min:1, Max:1)"]
+                EC2["EC2 Instance<br>🐳 Docker Compose<br>(ClickHouse, Grafana, LiteLLM)"]:::awsService
+            end
+
+            EBS[("Amazon EBS Volume<br>(Persistent ClickHouse Data)")]:::storage
+
+            RDS_Pri["RDS PostgreSQL<br>(Primary DB)"]:::awsService
+        end
+        class PrivateSubnetA privateSubnet;
+
+    %% Private Subnets (Zone B)
+        subgraph PrivateSubnetB ["Private Subnet B (Standby / HA)"]
+            RDS_Std["RDS PostgreSQL<br>(Standby DB)"]:::awsService
+        end
+        class PrivateSubnetB privateSubnet;
+
+    end
+
+%% Network & Traffic Flows
+    User -->|"1. Web/API Request (HTTPS)"| ALB
+
+%% ALB Path-based Routing (Routing to same EC2 on different ports)
+    ALB -->|"2a. Path /api/* -> Port 4000"| EC2
+    ALB -->|"2b. Path /grafana/* -> Port 3000"| EC2
+
+%% Secrets Management Flow
+    EC2 -.->|"3. Fetch Credentials via IAM Role"| SM
+
+%% DB Connections & Sync
+    EC2 -->|"4a. LiteLLM DB Connection (PostgreSQL)"| RDS_Pri
+    RDS_Pri -.->|"4b. CDC: Logical Replication (WAL)"| EC2
+
+%% Multi-AZ Replication
+    RDS_Pri ===>|"Synchronous Replication"| RDS_Std
+
+%% EBS Mounting Flow
+    ASG -.->|"Re-attach disk on failure"| EBS
+    EC2 <-->|"5. Mount /var/lib/clickhouse"| EBS
+
+%% Outbound Traffic (NAT Gateway)
+    EC2 -->|"6. Call External LLMs / Pull Images (GHCR)"| NAT
+    NAT -->|"7. NAT Routing"| IGW
+    IGW -->|"8. External Internet"| External[("External LLM APIs (OpenAI) / Repositories")]:::internet
