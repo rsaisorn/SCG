@@ -46,7 +46,7 @@
                       "format": 1,
                       "pluginVersion": "4.18.0",
                       "queryType": "table",
-                      "rawSql": "SELECT\n  sum(spend) AS today_spend\nFROM \"litellm_prod\".\"LiteLLM_SpendLogs\"\nWHERE startTime >= $__fromTime\n  AND startTime <= $__toTime"
+                      "rawSql": "SELECT\n  sum(spend) AS today_spend\nFROM \"litellm_prod\".\"monitor_spendlogs\"\nWHERE startTime >= $__fromTime\n  AND startTime <= $__toTime"
                     },
                     "version": "v0"
                   },
@@ -83,7 +83,7 @@
                     },
                     {
                       "color": "#FBBF24",
-                      "value": 70
+                      "value": 50
                     },
                     {
                       "color": "#F87171",
@@ -117,7 +117,7 @@
               "segmentCount": 1,
               "segmentSpacing": 0.3,
               "shape": "gauge",
-              "showThresholdLabels": true,
+              "showThresholdLabels": false,
               "showThresholdMarkers": true,
               "sizing": "auto",
               "sparkline": true,
@@ -150,7 +150,7 @@
                       "format": 1,
                       "pluginVersion": "4.18.0",
                       "queryType": "table",
-                      "rawSql": "SELECT\n  key_alias,\n  sum(spend) AS total_spend\nFROM \"litellm_prod\".\"LiteLLM_SpendLogs\"\nWHERE startTime >= $__fromTime\n  AND startTime <= $__toTime\n  AND key_alias IS NOT NULL\n  AND key_alias != ''\nGROUP BY key_alias\nORDER BY total_spend DESC\nLIMIT 10"
+                      "rawSql": "SELECT\n  key_alias,\n  sum(spend) AS total_spend\nFROM \"litellm_prod\".\"monitor_spendlogs\"\nWHERE startTime >= $__fromTime\n  AND startTime <= $__toTime\n  AND key_alias IS NOT NULL\n  AND key_alias != ''\nGROUP BY key_alias\nORDER BY total_spend DESC\nLIMIT 10"
                     },
                     "version": "v0"
                   },
@@ -260,7 +260,7 @@
                       "format": 1,
                       "pluginVersion": "4.18.0",
                       "queryType": "table",
-                      "rawSql": "SELECT\n  end_user,\n  sum(spend) AS total_spend\nFROM \"litellm_prod\".\"LiteLLM_SpendLogs\"\nWHERE startTime >= $__fromTime\n  AND startTime <= $__toTime\n  AND end_user IS NOT NULL\n  AND end_user != ''\nGROUP BY end_user\nORDER BY total_spend DESC\nLIMIT 10"
+                      "rawSql": "SELECT\n  end_user,\n  sum(spend) AS total_spend\nFROM \"litellm_prod\".\"monitor_spendlogs\"\nWHERE startTime >= $__fromTime\n  AND startTime <= $__toTime\n  AND end_user IS NOT NULL\n  AND end_user != ''\nGROUP BY end_user\nORDER BY total_spend DESC\nLIMIT 10"
                     },
                     "version": "v0"
                   },
@@ -348,6 +348,112 @@
         }
       }
     },
+    "panel-15": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [
+              {
+                "kind": "PanelQuery",
+                "spec": {
+                  "hidden": false,
+                  "query": {
+                    "datasource": {
+                      "name": "ffpvnlvixskjke"
+                    },
+                    "group": "grafana-clickhouse-datasource",
+                    "kind": "DataQuery",
+                    "spec": {
+                      "builderOptions": {
+                        "aggregates": [],
+                        "columns": [
+                          {
+                            "alias": "*",
+                            "custom": false,
+                            "name": "*",
+                            "type": "String"
+                          }
+                        ],
+                        "database": "litellm_prod",
+                        "filters": [],
+                        "groupBy": [],
+                        "limit": 1000,
+                        "meta": {},
+                        "mode": "list",
+                        "orderBy": [
+                          {
+                            "dir": "DESC",
+                            "name": "startTime"
+                          }
+                        ],
+                        "queryType": "table",
+                        "table": "monitor_spendlogs"
+                      },
+                      "editorType": "builder",
+                      "format": 1,
+                      "pluginVersion": "4.18.0",
+                      "rawSql": "SELECT * FROM \"litellm_prod\".\"monitor_spendlogs\" ORDER BY startTime DESC LIMIT 1000"
+                    },
+                    "version": "v0"
+                  },
+                  "refId": "A"
+                }
+              }
+            ],
+            "queryOptions": {},
+            "transformations": []
+          }
+        },
+        "description": "",
+        "id": 15,
+        "links": [],
+        "title": "New panel",
+        "vizConfig": {
+          "group": "table",
+          "kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "align": "auto",
+                  "cellOptions": {
+                    "type": "auto"
+                  },
+                  "footer": {
+                    "reducers": []
+                  },
+                  "inspect": false
+                },
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": 0
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "options": {
+              "cellHeight": "sm",
+              "showHeader": true
+            }
+          },
+          "version": "13.0.2"
+        }
+      }
+    },
     "panel-2": {
       "kind": "Panel",
       "spec": {
@@ -370,7 +476,7 @@
                       "format": 1,
                       "pluginVersion": "4.18.0",
                       "queryType": "table",
-                      "rawSql": "SELECT\n  count(*) AS today_requests\nFROM \"litellm_prod\".\"LiteLLM_SpendLogs\"\nWHERE startTime >= $__fromTime\n  AND startTime <= $__toTime"
+                      "rawSql": "SELECT\n  count(*) AS today_requests\nFROM \"litellm_prod\".\"monitor_spendlogs\"\nWHERE startTime >= $__fromTime\n  AND startTime <= $__toTime"
                     },
                     "version": "v0"
                   },
@@ -382,7 +488,7 @@
             "transformations": []
           }
         },
-        "description": "Total number of AI API calls made today. Each entry in LiteLLM_SpendLogs represents one request.\n",
+        "description": "Total number of AI API calls made today. Each entry in monitor_spendlogs represents one request.\n",
         "id": 2,
         "links": [],
         "title": "🔢  API Requests Today",
@@ -454,7 +560,7 @@
                       "format": 1,
                       "pluginVersion": "4.18.0",
                       "queryType": "table",
-                      "rawSql": "SELECT\n  sum(total_tokens) AS today_tokens\nFROM \"litellm_prod\".\"LiteLLM_SpendLogs\"\nWHERE startTime >= $__fromTime\n  AND startTime <= $__toTime"
+                      "rawSql": "SELECT\n  sum(total_tokens) AS today_tokens\nFROM \"litellm_prod\".\"monitor_spendlogs\"\nWHERE startTime >= $__fromTime\n  AND startTime <= $__toTime"
                     },
                     "version": "v0"
                   },
@@ -538,7 +644,7 @@
                       "format": 1,
                       "pluginVersion": "4.18.0",
                       "queryType": "table",
-                      "rawSql": "SELECT\n  if(count() = 0, 0,\n    countIf(status = 'failure') / count() * 100\n  ) AS failure_rate_today\nFROM \"litellm_prod\".\"LiteLLM_SpendLogs\"\nWHERE startTime >= $__fromTime\n  AND startTime <= $__toTime"
+                      "rawSql": "SELECT\n  if(count() = 0, 0,\n    countIf(status = 'failure') / count() * 100\n  ) AS failure_rate_today\nFROM \"litellm_prod\".\"monitor_spendlogs\"\nWHERE startTime >= $__fromTime\n  AND startTime <= $__toTime"
                     },
                     "version": "v0"
                   },
@@ -629,7 +735,7 @@
                       "format": 0,
                       "pluginVersion": "4.18.0",
                       "queryType": "timeseries",
-                      "rawSql": "SELECT\n  time,\n  sum(period_spend) OVER (ORDER BY time ASC) AS Today\nFROM\n(\n  SELECT\n    toStartOfInterval(startTime, INTERVAL 30 MINUTE) AS time,\n    sum(spend) AS period_spend\n  FROM \"litellm_prod\".\"LiteLLM_SpendLogs\"\n  WHERE startTime >= toStartOfDay(now())\n    AND startTime <= now()\n  GROUP BY time\n)\nORDER BY time ASC"
+                      "rawSql": "SELECT\n  time,\n  sum(period_spend) OVER (ORDER BY time ASC) AS Today\nFROM\n(\n  SELECT\n    toStartOfInterval(startTime, INTERVAL 30 MINUTE) AS time,\n    sum(spend) AS period_spend\n  FROM \"litellm_prod\".\"monitor_spendlogs\"\n  WHERE startTime >= $__fromTime\n    AND startTime <= $__toTime\n  GROUP BY time\n)\nORDER BY time ASC"
                     },
                     "version": "v0"
                   },
@@ -651,7 +757,7 @@
                       "format": 0,
                       "pluginVersion": "4.18.0",
                       "queryType": "timeseries",
-                      "rawSql": "SELECT\n  time,\n  sum(period_spend) OVER (ORDER BY time ASC) AS Yesterday\nFROM\n(\n  SELECT\n    toStartOfInterval(startTime + INTERVAL 1 DAY, INTERVAL 30 MINUTE) AS time,\n    sum(spend) AS period_spend\n  FROM \"litellm_prod\".\"LiteLLM_SpendLogs\"\n  WHERE startTime >= toStartOfDay(now() - INTERVAL 1 DAY)\n    AND startTime < toStartOfDay(now())\n  GROUP BY time\n)\nORDER BY time ASC"
+                      "rawSql": "SELECT\n  time,\n  sum(period_spend) OVER (ORDER BY time ASC) AS Yesterday\nFROM\n(\n  SELECT\n    toStartOfInterval(startTime + INTERVAL 1 DAY, INTERVAL 30 MINUTE) AS time,\n    sum(spend) AS period_spend\n  FROM \"litellm_prod\".\"monitor_spendlogs\"\n  WHERE startTime >= $__fromTime - INTERVAL 1 DAY\n    AND startTime <= $__toTime - INTERVAL 1 DAY\n  GROUP BY time\n)\nORDER BY time ASC"
                     },
                     "version": "v0"
                   },
@@ -673,11 +779,33 @@
                       "format": 0,
                       "pluginVersion": "4.18.0",
                       "queryType": "timeseries",
-                      "rawSql": "SELECT\n  time,\n  sum(period_spend) OVER (ORDER BY time ASC) AS same_day_last_week\nFROM\n(\n  SELECT\n    toStartOfInterval(startTime + INTERVAL 7 DAY, INTERVAL 30 MINUTE) AS time,\n    sum(spend) AS period_spend\n  FROM \"litellm_prod\".\"LiteLLM_SpendLogs\"\n  WHERE startTime >= toStartOfDay(now() - INTERVAL 7 DAY)\n    AND startTime < toStartOfDay(now() - INTERVAL 6 DAY)\n  GROUP BY time\n)\nORDER BY time ASC"
+                      "rawSql": "SELECT\n  time,\n  sum(period_spend) OVER (ORDER BY time ASC) AS same_day_last_week\nFROM\n(\n  SELECT\n    toStartOfInterval(startTime + INTERVAL 7 DAY, INTERVAL 30 MINUTE) AS time,\n    sum(spend) AS period_spend\n  FROM \"litellm_prod\".\"monitor_spendlogs\"\n  WHERE startTime >= $__fromTime - INTERVAL 7 DAY\n    AND startTime <= $__toTime - INTERVAL 7 DAY\n  GROUP BY time\n)\nORDER BY time ASC"
                     },
                     "version": "v0"
                   },
                   "refId": "C"
+                }
+              },
+              {
+                "kind": "PanelQuery",
+                "spec": {
+                  "hidden": false,
+                  "query": {
+                    "datasource": {
+                      "name": "ffpvnlvixskjke"
+                    },
+                    "group": "grafana-clickhouse-datasource",
+                    "kind": "DataQuery",
+                    "spec": {
+                      "editorType": "sql",
+                      "format": 0,
+                      "pluginVersion": "4.18.0",
+                      "queryType": "timeseries",
+                      "rawSql": "WITH $__fromTime AS selected_start\n\nSELECT\n  selected_start + toIntervalMinute(bucket_index * 30) AS time,\n  avg(running_spend) AS Seven_Day_Average\nFROM\n(\n  SELECT\n    d.day_offset AS day_offset,\n    b.bucket_index AS bucket_index,\n    sum(ifNull(s.period_spend, 0)) OVER (\n      PARTITION BY d.day_offset\n      ORDER BY b.bucket_index ASC\n      ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW\n    ) AS running_spend\n  FROM\n  (\n    SELECT\n      toInt64(number + 1) AS day_offset\n    FROM numbers(7)\n  ) AS d\n  CROSS JOIN\n  (\n    SELECT\n      toInt64(number) AS bucket_index\n    FROM numbers(48)\n  ) AS b\n  LEFT JOIN\n  (\n    SELECT\n      day_offset,\n      bucket_index,\n      sum(spend) AS period_spend\n    FROM\n    (\n      SELECT\n        startTime,\n        spend,\n        toInt64(intDiv(dateDiff('minute', startTime, selected_start), 1440) + 1) AS day_offset,\n        toInt64(\n          intDiv(\n            dateDiff(\n              'minute',\n              selected_start - toIntervalDay(toInt64(intDiv(dateDiff('minute', startTime, selected_start), 1440) + 1)),\n              startTime\n            ),\n            30\n          )\n        ) AS bucket_index\n      FROM \"litellm_prod\".\"monitor_spendlogs\"\n      WHERE startTime >= selected_start - INTERVAL 7 DAY\n        AND startTime < selected_start\n    )\n    WHERE day_offset >= 1\n      AND day_offset <= 7\n      AND bucket_index >= 0\n      AND bucket_index < 48\n    GROUP BY day_offset, bucket_index\n  ) AS s\n    ON d.day_offset = s.day_offset\n   AND b.bucket_index = s.bucket_index\n)\nGROUP BY bucket_index\nORDER BY time ASC"
+                    },
+                    "version": "v0"
+                  },
+                  "refId": "D"
                 }
               }
             ],
@@ -685,7 +813,7 @@
             "transformations": []
           }
         },
-        "description": "Cumulative AI spend throughout the day. Each line adds 30-minute spend into a running total, comparing today with yesterday and last Wednesday at the same time of day.\n",
+        "description": "Cumulative AI spend throughout the selected day. Each line adds 30-minute spend into a running total, comparing the selected day with the previous day, the same day last week, and the average running total from the past 7 days.",
         "id": 7,
         "links": [],
         "title": "📈 Running Total Spend Comparison",
@@ -762,7 +890,7 @@
                     {
                       "id": "color",
                       "value": {
-                        "fixedColor": "#00C49F",
+                        "fixedColor": "#00E676",
                         "mode": "fixed"
                       }
                     }
@@ -801,7 +929,7 @@
                 {
                   "matcher": {
                     "id": "byName",
-                    "options": "same_day_last_week",
+                    "options": "C same_day_last_week",
                     "scope": "series"
                   },
                   "properties": [
@@ -822,6 +950,36 @@
                         "dash": [
                           0,
                           10
+                        ],
+                        "fill": "dot"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "D Seven_Day_Average",
+                    "scope": "series"
+                  },
+                  "properties": [
+                    {
+                      "id": "displayName",
+                      "value": "7-Day Average"
+                    },
+                    {
+                      "id": "color",
+                      "value": {
+                        "fixedColor": "#EC4899",
+                        "mode": "fixed"
+                      }
+                    },
+                    {
+                      "id": "custom.lineStyle",
+                      "value": {
+                        "dash": [
+                          2,
+                          6
                         ],
                         "fill": "dot"
                       }
@@ -874,7 +1032,7 @@
                       "format": 1,
                       "pluginVersion": "4.18.0",
                       "queryType": "table",
-                      "rawSql": "SELECT\n  formatDateTime(toStartOfInterval(startTime + INTERVAL 7 HOUR, INTERVAL 30 MINUTE), '%H:%i') AS time_label,\n  count(*) AS request_count\nFROM \"litellm_prod\".\"LiteLLM_SpendLogs\"\nWHERE startTime >= $__fromTime\n  AND startTime <= $__toTime\nGROUP BY time_label\nORDER BY min(toStartOfInterval(startTime + INTERVAL 7 HOUR, INTERVAL 30 MINUTE)) ASC"
+                      "rawSql": "SELECT\n  formatDateTime(bucket_local, '%H:%i') AS time_label,\n  request_count\nFROM\n(\n  SELECT\n    toStartOfHour(startTime + INTERVAL 7 HOUR) AS bucket_local,\n    count(*) AS request_count\n  FROM \"litellm_prod\".\"monitor_spendlogs\"\n  WHERE startTime >= $__fromTime\n    AND startTime <= $__toTime\n  GROUP BY bucket_local\n  ORDER BY bucket_local ASC\n  WITH FILL\n    FROM toStartOfHour($__fromTime + INTERVAL 7 HOUR)\n    TO toStartOfHour($__toTime + INTERVAL 7 HOUR)\n    STEP INTERVAL 1 HOUR\n)"
                     },
                     "version": "v0"
                   },
@@ -886,10 +1044,10 @@
             "transformations": []
           }
         },
-        "description": "Number of AI requests per 30-minute window today. Peaks indicate busy usage periods across the team.\n",
+        "description": "Number of AI requests per 1 hour window today. Peaks indicate busy usage periods across the team.\n",
         "id": 8,
         "links": [],
-        "title": "📊  Requests per 30 min — Today",
+        "title": "📊  Requests per Hour — Today",
         "vizConfig": {
           "group": "barchart",
           "kind": "VizConfig",
@@ -985,7 +1143,7 @@
                       "format": 1,
                       "pluginVersion": "4.18.0",
                       "queryType": "table",
-                      "rawSql": "SELECT\n  replaceRegexpOne(model, '^.*/', '') AS model_name,\n  sum(spend) AS total_spend\nFROM \"litellm_prod\".\"LiteLLM_SpendLogs\"\nWHERE startTime >= $__fromTime\n  AND startTime <= $__toTime\n  AND model IS NOT NULL\n  AND model != ''\nGROUP BY model_name\nORDER BY total_spend DESC\nLIMIT 10"
+                      "rawSql": "SELECT\n  replaceRegexpOne(model, '^.*/', '') AS model_name,\n  sum(spend) AS total_spend\nFROM \"litellm_prod\".\"monitor_spendlogs\"\nWHERE startTime >= $__fromTime\n  AND startTime <= $__toTime\n  AND model IS NOT NULL\n  AND model != ''\nGROUP BY model_name\nORDER BY total_spend DESC\nLIMIT 10"
                     },
                     "version": "v0"
                   },
@@ -1193,6 +1351,19 @@
             "x": 16,
             "y": 13
           }
+        },
+        {
+          "kind": "GridLayoutItem",
+          "spec": {
+            "element": {
+              "kind": "ElementReference",
+              "name": "panel-15"
+            },
+            "height": 8,
+            "width": 12,
+            "x": 0,
+            "y": 22
+          }
         }
       ]
     }
@@ -1216,7 +1387,7 @@
     "tv"
   ],
   "timeSettings": {
-    "autoRefresh": "1m",
+    "autoRefresh": "",
     "autoRefreshIntervals": [
       "10s",
       "30s",
