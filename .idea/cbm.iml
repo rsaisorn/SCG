@@ -5,7 +5,7 @@
       <excludeFolder url="file://$MODULE_DIR$/../cbm/.venv" />
       <excludeFolder url="file://$MODULE_DIR$/../cbm/LineObsSteel/.venv" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.14 (dashboard-config)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.14 (.venv)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>
